@@ -38,7 +38,7 @@ void setup() {
   display.setCursor(0, 0);
   
   // Display startup message
-  display.println(F("NO one noticed"));
+  display.println(F("No one noticed"));
   display.println(F(""));
   display.println();
   display.println(F("..."));
