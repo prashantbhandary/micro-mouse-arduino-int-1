@@ -10,13 +10,20 @@
 
 // #define PWMA 3
 // #define PWMB 6
-#define AIN1 5 //4
-#define BIN1 6//8 //8
-#define AIN2 4 //5
-#define BIN2 8//9 //9
+// #define AIN1 5 //4
+// #define BIN1 6//8 //8
+// #define AIN2 4 //5
+// #define BIN2 8//9 //9
 
+// #define PWMA 3
+// #define PWMB 9//6 //
+
+#define AIN1 4
+#define BIN1 8
+#define AIN2 5
+#define BIN2 9
 #define PWMA 3
-#define PWMB 9//6 //
+#define PWMB 6
 
 const int offsetA = 1;
 const int offsetB = 1;
