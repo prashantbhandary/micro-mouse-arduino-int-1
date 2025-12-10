@@ -53,8 +53,8 @@ void setup()
 {
   qtra.setTypeAnalog();
   qtra.setSensorPins((const uint8_t[]) {   // QTR8A sensor setup
-    // A7, A6, A5, A4, A3, A2, A1, A0
-    A0, A1, A2, A3, A4, A5, A6, A7
+    A7, A6, A5, A4, A3, A2, A1, A0
+    // A0, A1, A2, A3, A4, A5, A6, A7
   }, NUM_SENSORS);
 
   pinMode(sw1, INPUT);
