@@ -18,6 +18,7 @@ int s1, s2, s3;
 char dir;
 int chr = 1;
 
+//prashant
 // Sensor configuration
 #define NUM_SENSORS 8
 uint16_t sensors1[NUM_SENSORS];
