@@ -26,7 +26,7 @@ uint16_t thr[NUM_SENSORS];
 
 // PID parameters
 #define MaxSpeed 200
-#define BaseSpeed 170
+#define BaseSpeed 180
 int lastError = 0;
 float kp = 0.161;    // Proportional gain - tune based on your bot
 float kd = 0.8;      // Derivative gain - tune based on your bot
@@ -52,11 +52,13 @@ void follow_segment3();
 
 void setup()
 {
+  //sync
   qtra.setTypeAnalog();
   qtra.setSensorPins((const uint8_t[]) {   // QTR8A sensor setup
-    A7, A6, A5, A4, A3, A2, A1, A0
-    // A0, A1, A2, A3, A4, A5, A6, A7
+    // A7, A6, A5, A4, A3, A2, A1, A0
+    A0, A1, A2, A3, A4, A5, A6, A7
   }, NUM_SENSORS);
+  analogReference(EXTERNAL);
 
   pinMode(sw1, INPUT);
   pinMode(sw2, INPUT);
@@ -76,6 +78,10 @@ void setup()
   digitalWrite(led, HIGH);
   delay(800);
   calibration();
+  // for (int i = 0; i < NUM_SENSORS; i++)
+  //   {
+  //     thr[i] = 700;
+  //   }
   s2 = digitalRead(sw2);
   while (s2 == HIGH)
   {
@@ -101,11 +107,11 @@ void calibration()
   {
     if (i < 25 || i >= 75)
     {
-      left(motor1, motor2, 170);   // Left turn
+      left(motor1, motor2, 150);   // Left turn
     }
     else
     {
-      right(motor1, motor2, 170);  // Right turn
+      right(motor1, motor2, 150);  // Right turn
     }
     qtra.calibrate();
     delay(10);
@@ -172,8 +178,9 @@ void maze()
     follow_segment(); // Follow path until an intersection is detected
     digitalWrite(led, HIGH);
     brake(motor1,motor2);
-    forward(motor1, motor2, 150); //150
-    delay(30);  //120
+    //sync
+    forward(motor1, motor2, 120); //150
+    delay(20);  //30
     brake(motor1, motor2);
     // These variables record whether the robot detected a line to the
     // left, straight, or right while examining the current intersection
@@ -181,6 +188,10 @@ void maze()
     unsigned char found_straight = 0;
     unsigned char found_right = 0;
     
+    for (int i = 0; i < NUM_SENSORS; i++)
+    {
+      thr[i] = 650;
+    }
     // Read sensors and check intersection type
     qtra.readLineWhite(sensors1);
 
@@ -197,8 +208,9 @@ void maze()
 
     // Drive straight a bit more - this is enough to line up our
     //wheels with the intersection.
-    forward(motor1, motor2, 150);
-    delay(30);  //50
+    //sync
+    forward(motor1, motor2, 120); //150
+    delay(20);  //30
 
     brake(motor1, motor2);
     delay(40); //100
@@ -351,8 +363,8 @@ void turn(char dir)
         qtra.readLineWhite(sensors1);  // U-turn using right turn
       }
       qtra.readLineWhite(sensors1);
-      left(motor1, motor2, 100);
-      while (sensors1[0] > thr[0])
+      left(motor1, motor2, 100); //100
+      while (sensors1[0] < thr[0])
       {
         qtra.readLineWhite(sensors1);
       }
