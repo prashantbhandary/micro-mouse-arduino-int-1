@@ -53,8 +53,7 @@ void setup()
 {
   qtra.setTypeAnalog();
   qtra.setSensorPins((const uint8_t[]) {   // QTR8A sensor setup
-    // A7, A6, A5, A4, A3, A2, A1, A0
-    A0, A1, A2, A3, A4, A5, A6, A7
+    A7, A6, A5, A4, A3, A2, A1, A0
   }, NUM_SENSORS);
 
   pinMode(sw1, INPUT);
@@ -172,7 +171,7 @@ void maze()
     digitalWrite(led, HIGH);
     brake(motor1,motor2);
     forward(motor1, motor2, 150); //150
-    delay(30);  //120
+    delay(100);  //120
     brake(motor1, motor2);
     // These variables record whether the robot detected a line to the
     // left, straight, or right while examining the current intersection
@@ -182,31 +181,27 @@ void maze()
     
     // Read sensors and check intersection type
     qtra.readLineWhite(sensors1);
-
-
+    
+    if (sensors1[0] < thr[0])
+    {
+      found_left = 1;
+    }
     if (sensors1[7] < thr[7])
     {
       found_right = 1;
     }
-    if (sensors1[0] < thr[0])
-    {
-      found_left = 1;
-      Serial.print("found left");
-    }
-
     // Drive straight a bit more - this is enough to line up our
     //wheels with the intersection.
-    forward(motor1, motor2, 150);
-    delay(30);  //50
+    forward(motor1, motor2, 100);
+    delay(50);  //50
 
     brake(motor1, motor2);
-    delay(40); //100
+    delay(100); //100
 
     qtra.readLineWhite(sensors1);
     if (sensors1[1] < thr[1] || sensors1[2] < thr[2] || sensors1[3] < thr[3] || sensors1[4] < thr[4] || sensors1[5] < thr[5] || sensors1[6] < thr[6] )
     {
       found_straight = 1;
-      
     }
     // Check for the ending spot.
     if (sensors1[1] < thr[1] && sensors1[2] < thr[2] && sensors1[3] < thr[3] && 
@@ -218,9 +213,8 @@ void maze()
       dir = select_turnL(found_left, found_straight, found_right);
     else if (chr == 2)
       dir = select_turnR(found_right, found_straight, found_left);
-    Serial.println(dir);
+    // Serial.println(dir);
     // Take a turn according to that
-
     turn(dir);
     // Store the intersection in the path variable.
     path[path_length] = dir;
@@ -247,22 +241,23 @@ void maze()
     s2 = digitalRead(sw2);     // Wait for pressing a switch
   }
   delay(800);
-  forward(motor1, motor2, 40); 
-  delay(40);
   forward(motor1, motor2, 60);
   delay(40);
   forward(motor1, motor2, 80);
   delay(40);
+  forward(motor1, motor2, 100);
+  delay(40);
   while (1)
   {
+    
     int k;
     for (k = 0; k < path_length; k++)
     {
       follow_segment();
-      forward(motor1, motor2, 80); //50    // After reaching a intercetion follow the shortest path turn
-      delay(30);  //50
+      forward(motor1, motor2, 50);    // After reaching a intercetion follow the shortest path turn
+      delay(50);
       forward(motor1, motor2, 60);
-      delay(100); //200
+      delay(200);
       brake(motor1, motor2);
       delay(5);
       turn(path[k]);
@@ -343,15 +338,15 @@ void turn(char dir)
       brake(motor1, motor2);
       break;
     case 'B':
-      left(motor1, motor2, 170);
+      right(motor1, motor2, 180);
       qtra.readLineWhite(sensors1);
-      while (sensors1[0] > thr[0])
+      while (sensors1[7] > thr[7])
       {
         qtra.readLineWhite(sensors1);  // U-turn using right turn
       }
       qtra.readLineWhite(sensors1);
-      left(motor1, motor2, 100);
-      while (sensors1[0] > thr[0])
+      right(motor1, motor2, 140);
+      while (sensors1[7] < thr[7])
       {
         qtra.readLineWhite(sensors1);
       }
@@ -362,7 +357,7 @@ void follow_segment1()
 {
   // Fast PID after turn to quickly align bot on line
   float Kp = 0.2; //0.2
-  float Kd = 15;  //10
+  float Kd = 10;  //10
   for (int j = 0; j < 20; j++) //10
   {
     int position = qtra.readLineWhite(sensors1);  // For BLACK line, use readLineBlack()
