@@ -25,8 +25,8 @@ uint16_t sensors1[NUM_SENSORS];
 uint16_t thr[NUM_SENSORS];
 
 // PID parameters
-#define MaxSpeed 200
-#define BaseSpeed 180
+#define MaxSpeed 160
+#define BaseSpeed 150
 int lastError = 0;
 float kp = 0.161;    // Proportional gain - tune based on your bot
 float kd = 0.8;      // Derivative gain - tune based on your bot
@@ -55,9 +55,10 @@ void setup()
   //sync
   qtra.setTypeAnalog();
   qtra.setSensorPins((const uint8_t[]) {   // QTR8A sensor setup
-    // A7, A6, A5, A4, A3, A2, A1, A0
-    A0, A1, A2, A3, A4, A5, A6, A7
+     A7, A6, A5, A4, A3, A2, A1, A0
+    //A0, A1, A2, A3, A4, A5, A6, A7
   }, NUM_SENSORS);
+  
   analogReference(EXTERNAL);
 
   pinMode(sw1, INPUT);
@@ -82,10 +83,28 @@ void setup()
   //   {
   //     thr[i] = 700;
   //   }
-  s2 = digitalRead(sw2);
-  while (s2 == HIGH)
+  while (1)
   {
-    s2 = digitalRead(sw2);      // Press sw2 to start the bot and follow the path
+    int s2 = digitalRead(sw2);
+    int s3 = digitalRead(sw3);
+    if (s2 == LOW)
+    {
+      chr = 1;
+      break;                        // Here we have to choose the Rule which will follow by the bot
+                                    // S1 switch for LHS and s2 switch for RHS
+                                    // In LHS left, straight, right will be priority
+    }                               // In RHS right, straight, left will be priority
+    if (s3 == LOW)                  
+    {
+      chr = 2;   
+      break;
+    }
+  }
+  delay(900);
+  s1 = digitalRead(sw1);
+  while (s1 == HIGH)
+  {
+    s1 = digitalRead(sw1);      // Press sw2 to start the bot and follow the path
   }
   delay(800);
 }
@@ -197,10 +216,12 @@ void maze()
 
 
     if (sensors1[7] < thr[7])
+    // if (sensors1[7] < 650)
     {
       found_right = 1;
     }
     if (sensors1[0] < thr[0])
+    // if (sensors1[0] < 650)
     {
       found_left = 1;
       Serial.print("found left");
@@ -243,8 +264,8 @@ void maze()
   }
   // Second run: execute the optimized shortest path
   brake(motor1, motor2);
-  forward(motor1, motor2, 80);
-  delay(400);                   // Move straight at end point and turn on LED
+  forward(motor1, motor2, 70);
+  delay(60); //400                  // Move straight at end point and turn on LED
   brake(motor1, motor2);
   for (int w = 0; w < path_length; w++)
   {
@@ -272,10 +293,10 @@ void maze()
     for (k = 0; k < path_length; k++)
     {
       follow_segment();
-      forward(motor1, motor2, 80); //50    // After reaching a intercetion follow the shortest path turn
+      forward(motor1, motor2, 50); //50    // After reaching a intercetion follow the shortest path turn
       delay(30);  //50
       forward(motor1, motor2, 60);
-      delay(100); //200
+      delay(30); //200
       brake(motor1, motor2);
       delay(5);
       turn(path[k]);
@@ -283,7 +304,7 @@ void maze()
     follow_segment();
     brake(motor1, motor2);
     forward(motor1, motor2, 80);
-    delay(400);
+    delay(200);
     brake(motor1, motor2);
     digitalWrite(led, HIGH);
     delay(4000);
@@ -323,14 +344,14 @@ void turn(char dir)
   switch (dir)
   {
     case 'L':
-      left(motor1, motor2, 200);  //200
+      left(motor1, motor2, 210);  //200
       qtra.readLineWhite(sensors1);
       while (sensors1[0] > thr[0])
       {
         qtra.readLineWhite(sensors1);  // Move left until sensor goes from white to black
       }
       qtra.readLineWhite(sensors1);
-      left(motor1, motor2, 140);  //140
+      left(motor1, motor2, 150);  //140
       while (sensors1[0] < thr[0])
       {
         qtra.readLineWhite(sensors1);  // Continue left until back on white line
@@ -340,14 +361,14 @@ void turn(char dir)
       break;
       
     case 'R':
-      right(motor1, motor2, 200); //200
+      right(motor1, motor2, 210); //200
       qtra.readLineWhite(sensors1);
       while (sensors1[7] > thr[7])
       {
         qtra.readLineWhite(sensors1);  // Move right until sensor goes from white to black
       }
       qtra.readLineWhite(sensors1);
-      right(motor1, motor2, 140); //140
+      right(motor1, motor2, 150); //140
       while (sensors1[7] < thr[7])
       {
         qtra.readLineWhite(sensors1);  // Continue right until back on white line
@@ -375,8 +396,8 @@ void follow_segment1()
 {
   // Fast PID after turn to quickly align bot on line
   float Kp = 0.2; //0.2
-  float Kd = 15;  //10
-  for (int j = 0; j < 20; j++) //10
+  float Kd = 10; //15 //10
+  for (int j = 0; j < 30; j++) //20 //10
   {
     int position = qtra.readLineWhite(sensors1);  // For BLACK line, use readLineBlack()
     int error = 3500 - position;
@@ -389,6 +410,7 @@ void follow_segment1()
     if (rightMotorSpeed < 0) rightMotorSpeed = 0;
     if (leftMotorSpeed < 0) leftMotorSpeed = 0;
     motor1.drive(rightMotorSpeed);
+
     motor2.drive(leftMotorSpeed);
     delay(1);
   }
