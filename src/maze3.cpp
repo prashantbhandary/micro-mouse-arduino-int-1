@@ -25,8 +25,8 @@ uint16_t sensors1[NUM_SENSORS];
 uint16_t thr[NUM_SENSORS];
 
 // PID parameters
-#define MaxSpeed 200
-#define BaseSpeed 180
+#define MaxSpeed  220
+#define BaseSpeed 220
 int lastError = 0;
 float kp = 0.161;    // Proportional gain - tune based on your bot
 float kd = 0.8;      // Derivative gain - tune based on your bot
@@ -55,10 +55,10 @@ void setup()
   //sync
   qtra.setTypeAnalog();
   qtra.setSensorPins((const uint8_t[]) {   // QTR8A sensor setup
-    // A7, A6, A5, A4, A3, A2, A1, A0
-    A0, A1, A2, A3, A4, A5, A6, A7
+    A7, A6, A5, A4, A3, A2, A1, A0
+    // A0, A1, A2, A3, A4, A5, A6, A7
   }, NUM_SENSORS);
-  analogReference(EXTERNAL);
+  // analogReference(EXTERNAL);
 
   pinMode(sw1, INPUT);
   pinMode(sw2, INPUT);
@@ -246,11 +246,11 @@ void maze()
   forward(motor1, motor2, 80);
   delay(400);                   // Move straight at end point and turn on LED
   brake(motor1, motor2);
-  for (int w = 0; w < path_length; w++)
-  {
-    Serial.print(path[w]);
-    Serial.print(' ');
-  }
+//   for (int w = 0; w < path_length; w++)
+//   {
+//     Serial.print(path[w]);
+//     Serial.print(' ');
+//   }
   digitalWrite(led, HIGH);
   delay(4000);
   digitalWrite(led, LOW);
@@ -275,7 +275,7 @@ void maze()
       forward(motor1, motor2, 80); //50    // After reaching a intercetion follow the shortest path turn
       delay(30);  //50
       forward(motor1, motor2, 60);
-      delay(100); //200
+      delay(50); //200
       brake(motor1, motor2);
       delay(5);
       turn(path[k]);
