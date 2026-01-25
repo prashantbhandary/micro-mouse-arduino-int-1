@@ -7,25 +7,15 @@
 // #define AIN2 5
 // #define BIN2 8
 
-// #define PWMA 3
-// #define PWMB 6
-
-
-// #define AIN1 4
-// #define BIN1 8
-// #define AIN2 5
-// #define BIN2 9
-
-// #define PWMA 3
-// #define PWMB 6
-// Motor pin definitions
-
-#define AIN1 4  //4
+#define AIN1 4
 #define BIN1 9
-#define AIN2 5   //5
+#define AIN2 5
 #define BIN2 8
+
 #define PWMA 3
 #define PWMB 6
+
+
 
 // Control switches and LED
 #define sw1 10
@@ -44,8 +34,8 @@ uint16_t sensors1[NUM_SENSORS];
 uint16_t thr[NUM_SENSORS];
 
 // PID parameters
-#define MaxSpeed  160
-#define BaseSpeed 160
+#define MaxSpeed  170
+#define BaseSpeed 170
 int lastError = 0;
 float kp = 0.161;    // Proportional gain - tune based on your bot
 float kd = 0.8;      // Derivative gain - tune based on your bot
@@ -125,12 +115,13 @@ void calibration()
   for (int i = 0; i <= 100; i++)
   {
     if (i < 25 || i >= 75)
+
     {
-      left(motor1, motor2, 150);   // Left turn
+      right(motor1, motor2, 150);   // Left turn
     }
     else
     {
-      right(motor1, motor2, 150);  // Right turn
+      left(motor1, motor2, 150);  // Ri ght turn
     }
     qtra.calibrate();
     delay(10);
@@ -168,7 +159,7 @@ void follow_segment()
     int motorSpeed = kp * error + kd * (error - lastError);
     lastError = error;
     int rightMotorSpeed = BaseSpeed - motorSpeed;
-    int leftMotorSpeed = BaseSpeed + motorSpeed;
+    int leftMotorSpeed = BaseSpeed + motorSpeed  ; //leftoffset implementation
     if (rightMotorSpeed > MaxSpeed) rightMotorSpeed = MaxSpeed;
     if (leftMotorSpeed > MaxSpeed) leftMotorSpeed = MaxSpeed;
     if (rightMotorSpeed < 0) rightMotorSpeed = 0;
@@ -198,7 +189,7 @@ void maze()
     digitalWrite(led, HIGH);
     brake(motor1,motor2);
     //sync
-    forward(motor1, motor2, 100); //150
+    forward(motor1, motor2, 120); //150
     delay(20);  //30
     brake(motor1, motor2);
     // These variables record whether the robot detected a line to the
@@ -222,7 +213,7 @@ void maze()
     if (sensors1[0] < thr[0])
     {
       found_left = 1;
-      Serial.print("found left");
+      // Serial.print("found left");
     }
 
     // Drive straight a bit more - this is enough to line up our
@@ -232,7 +223,7 @@ void maze()
     delay(20);  //30
 
     brake(motor1, motor2);
-    // delay(40); //100
+    delay(40); //100
 
     qtra.readLineWhite(sensors1);
     if (sensors1[1] < thr[1] || sensors1[2] < thr[2] || sensors1[3] < thr[3] || sensors1[4] < thr[4] || sensors1[5] < thr[5] || sensors1[6] < thr[6] )
@@ -265,11 +256,11 @@ void maze()
   forward(motor1, motor2, 80);
   delay(400);                   // Move straight at end point and turn on LED
   brake(motor1, motor2);
-//   for (int w = 0; w < path_length; w++)
-//   {
-//     Serial.print(path[w]);
-//     Serial.print(' ');
-//   }
+  for (int w = 0; w < path_length; w++)
+  {
+    Serial.print(path[w]);
+    Serial.print(' ');
+  }
   digitalWrite(led, HIGH);
   delay(4000);
   digitalWrite(led, LOW);
@@ -294,7 +285,7 @@ void maze()
       forward(motor1, motor2, 80); //50    // After reaching a intercetion follow the shortest path turn
       delay(30);  //50
       forward(motor1, motor2, 60);
-      delay(50); //200
+      delay(100); //200
       brake(motor1, motor2);
       delay(5);
       turn(path[k]);
@@ -402,7 +393,7 @@ void follow_segment1()
     int motorSpeed = Kp * error + Kd * (error - lastError);
     lastError = error;
     int rightMotorSpeed = BaseSpeed - motorSpeed;
-    int leftMotorSpeed = BaseSpeed + motorSpeed;
+    int leftMotorSpeed = BaseSpeed + motorSpeed   ; //leftoffset implementation
     if (rightMotorSpeed > MaxSpeed) rightMotorSpeed = MaxSpeed;
     if (leftMotorSpeed > MaxSpeed) leftMotorSpeed = MaxSpeed;
     if (rightMotorSpeed < 0) rightMotorSpeed = 0;
@@ -470,7 +461,7 @@ void follow_segment2()
     int motorSpeed = Kp * error + Kd * (error - lastError);
     lastError = error;
     int rightMotorSpeed = baseSpeed + motorSpeed;
-    int leftMotorSpeed = baseSpeed - motorSpeed;
+    int leftMotorSpeed = baseSpeed - motorSpeed  ; //leftoffset implementation
     if (rightMotorSpeed > maxSpeed) rightMotorSpeed = maxSpeed;
     if (leftMotorSpeed > maxSpeed) leftMotorSpeed = maxSpeed;
     if (rightMotorSpeed < 0) rightMotorSpeed = 0;
@@ -492,7 +483,7 @@ void follow_segment3()
     int motorSpeed = Kp * error + Kd * (error - lastError);
     lastError = error;
     int rightMotorSpeed = BaseSpeed - motorSpeed;
-    int leftMotorSpeed = BaseSpeed + motorSpeed;
+    int leftMotorSpeed = BaseSpeed + motorSpeed  ; //leftoffset implementation
     if (rightMotorSpeed > MaxSpeed) rightMotorSpeed = MaxSpeed;
     if (leftMotorSpeed > MaxSpeed) leftMotorSpeed = MaxSpeed;
     if (rightMotorSpeed < 0) rightMotorSpeed = 0;

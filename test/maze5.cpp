@@ -2,31 +2,12 @@
 #include <QTRSensors.h>       // It is for QTR sensors 
 
 // Motor pin definitions
-// #define AIN1 4
-// #define BIN1 9
-// #define AIN2 5
-// #define BIN2 8
-
-// #define PWMA 3
-// #define PWMB 6
-
-
-// #define AIN1 4
-// #define BIN1 8
-// #define AIN2 5
-// #define BIN2 9
-
-// #define PWMA 3
-// #define PWMB 6
-// Motor pin definitions
-
-#define AIN1 4  //4
-#define BIN1 9
-#define AIN2 5   //5
-#define BIN2 8
+#define AIN1 4
+#define BIN1 8
+#define AIN2 5
+#define BIN2 9
 #define PWMA 3
 #define PWMB 6
-
 // Control switches and LED
 #define sw1 10
 #define sw2 11
@@ -44,11 +25,13 @@ uint16_t sensors1[NUM_SENSORS];
 uint16_t thr[NUM_SENSORS];
 
 // PID parameters
-#define MaxSpeed  160
-#define BaseSpeed 160
+#define MaxSpeed  210
+#define BaseSpeed 210
 int lastError = 0;
-float kp = 0.161;    // Proportional gain - tune based on your bot
-float kd = 0.8;      // Derivative gain - tune based on your bot
+float kp = 0.161;    // It fully depends on the bot system
+float kd = 0.855;    // Please follow the method provided in instructables to get your values
+float ki=0.0033;
+int last_pos = 3500;
 // Shortest path parameters
 char path[100];
 int path_length = 0;
@@ -165,7 +148,7 @@ void follow_segment()
     // For BLACK line, use readLineBlack() instead of readLineWhite()
     int position = qtra.readLineWhite(sensors1);   // Get current position on line
     int error = 3500 - position;  // 3500 is center position
-    int motorSpeed = kp * error + kd * (error - lastError);
+    int motorSpeed = kp * error + kd * (error - lastError)+ ki*(error + last_pos);
     lastError = error;
     int rightMotorSpeed = BaseSpeed - motorSpeed;
     int leftMotorSpeed = BaseSpeed + motorSpeed;
@@ -198,7 +181,7 @@ void maze()
     digitalWrite(led, HIGH);
     brake(motor1,motor2);
     //sync
-    forward(motor1, motor2, 100); //150
+    forward(motor1, motor2, 120); //150
     delay(20);  //30
     brake(motor1, motor2);
     // These variables record whether the robot detected a line to the
@@ -228,11 +211,11 @@ void maze()
     // Drive straight a bit more - this is enough to line up our
     //wheels with the intersection.
     //sync
-    forward(motor1, motor2, 100); //150
+    forward(motor1, motor2, 120); //150
     delay(20);  //30
 
     brake(motor1, motor2);
-    // delay(40); //100
+    delay(40); //100
 
     qtra.readLineWhite(sensors1);
     if (sensors1[1] < thr[1] || sensors1[2] < thr[2] || sensors1[3] < thr[3] || sensors1[4] < thr[4] || sensors1[5] < thr[5] || sensors1[6] < thr[6] )
@@ -265,11 +248,11 @@ void maze()
   forward(motor1, motor2, 80);
   delay(400);                   // Move straight at end point and turn on LED
   brake(motor1, motor2);
-//   for (int w = 0; w < path_length; w++)
-//   {
-//     Serial.print(path[w]);
-//     Serial.print(' ');
-//   }
+  for (int w = 0; w < path_length; w++)
+  {
+    Serial.print(path[w]);
+    Serial.print(' ');
+  }
   digitalWrite(led, HIGH);
   delay(4000);
   digitalWrite(led, LOW);
@@ -294,7 +277,7 @@ void maze()
       forward(motor1, motor2, 80); //50    // After reaching a intercetion follow the shortest path turn
       delay(30);  //50
       forward(motor1, motor2, 60);
-      delay(50); //200
+      delay(100); //200
       brake(motor1, motor2);
       delay(5);
       turn(path[k]);

@@ -3,28 +3,12 @@
 #include <QTRSensors.h>       // It is for qtr sensors 
 #include <Arduino.h>    
 // Initialization of the motors
-// #define AIN1 4
-// #define BIN1 8
-// #define AIN2 5
-// #define BIN2 9
-
-// #define PWMA 3
-// #define PWMB 6
-// #define AIN1 5 //4
-// #define BIN1 6//8 //8
-// #define AIN2 4 //5
-// #define BIN2 8//9 //9
-
-// #define PWMA 3
-// #define PWMB 9//6 //
-
 #define AIN1 4
 #define BIN1 8
 #define AIN2 5
 #define BIN2 9
 #define PWMA 3
 #define PWMB 6
-
 const int offsetA = 1;
 const int offsetB = 1;
 
@@ -44,16 +28,14 @@ int thr[8];
 #define MaxSpeed 150
 #define BaseSpeed 150
 int lastError = 0;
-float kp = 0.151;    // It fully depends on the bot system
-float kd = 0.8;    // Please follow the method provided in instructables to get your values
-// float ki=0.00000008;
+float kp = 0.141;    // It fully depends on the bot system
+float kd = 0.85;    // Please follow the method provided in instructables to get your values
+float ki=0.0033;
 int last_pos = 3500;
-
 
 // Creating the instance of class for motor and senors
 Motor motor1 = Motor(AIN1, AIN2, PWMA, 1, 1); 
 Motor motor2 = Motor(BIN1, BIN2, PWMB, 1, 1); // right
-
 QTRSensors qtra;
 
 void follow_segment1();
@@ -101,7 +83,7 @@ void follow_segment1()
     int error =  3500 - position;
     // Serial.println("position");
     // Serial.println(position);
-    int motorSpeed = kp * error + kd * (error - lastError);
+    int motorSpeed = kp * error + kd * (error - lastError)+ ki*(error + last_pos);
     lastError = error;
     int rightMotorSpeed = BaseSpeed - motorSpeed;
     int leftMotorSpeed = BaseSpeed + motorSpeed;

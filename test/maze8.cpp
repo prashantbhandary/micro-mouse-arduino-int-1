@@ -1,23 +1,7 @@
 #include <SparkFun_TB6612.h>  // This library is for SparkFun motor driver  
 #include <QTRSensors.h>       // It is for QTR sensors 
 
-// Motor pin definitions
-// #define AIN1 4
-// #define BIN1 9
-// #define AIN2 5
-// #define BIN2 8
 
-// #define PWMA 3
-// #define PWMB 6
-
-
-// #define AIN1 4
-// #define BIN1 8
-// #define AIN2 5
-// #define BIN2 9
-
-// #define PWMA 3
-// #define PWMB 6
 // Motor pin definitions
 
 #define AIN1 4  //4
@@ -37,14 +21,13 @@ int s1, s2, s3;
 char dir;
 int chr = 1;
 
-//prashant
 // Sensor configuration
 #define NUM_SENSORS 8
 uint16_t sensors1[NUM_SENSORS];
 uint16_t thr[NUM_SENSORS];
 
 // PID parameters
-#define MaxSpeed  160
+#define MaxSpeed  180
 #define BaseSpeed 160
 int lastError = 0;
 float kp = 0.161;    // Proportional gain - tune based on your bot
@@ -101,10 +84,30 @@ void setup()
   //   {
   //     thr[i] = 700;
   //   }
-  s2 = digitalRead(sw2);
-  while (s2 == HIGH)
+  while (1)
   {
-    s2 = digitalRead(sw2);      // Press sw2 to start the bot and follow the path
+    int s2 = digitalRead(sw2);
+    int s3 = digitalRead(sw3);
+    if (s2 == LOW)
+    {
+      chr = 1;
+      break;                        // Here we have to choose the Rule which will follow by the bot
+                                    // S1 switch for LHS and s2 switch for RHS
+                                    // In LHS left, straight, right will be priority
+    }                               // In RHS right, straight, left will be priority
+    if (s3 == LOW)                  
+    {
+      chr = 2;   
+      break;
+    }
+  }
+  Serial.println(chr);
+  delay(900);
+
+  s1 = digitalRead(sw1);
+  while (s1 == HIGH)
+  {
+    s1 = digitalRead(sw1);      // Press s2 switch to start a bot to follow the path
   }
   delay(800);
 }
